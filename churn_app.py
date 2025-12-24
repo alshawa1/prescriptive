@@ -9,95 +9,76 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.cluster import KMeans
 
 # ==========================================
-# PAGE CONFIG & PREMIUM CYBER-SPACE THEME
+# PAGE CONFIG & MODERN MINIMALIST DARK THEME
 # ==========================================
-st.set_page_config(page_title="AI Strategy Command", layout="wide", page_icon="⚖️")
+st.set_page_config(page_title="Telecom AI Strategy", layout="wide", page_icon="📡")
 
-# Nuclear CSS: Deep Space Violet & Gold Glassmorphism
+# Ultra-Clean Modern Dark CSS
 st.markdown("""
 <style>
-    /* 1. Global Background - Deep Cosmic Indigo */
+    /* 1. Global Background - Deep Graphite */
     [data-testid="stAppViewContainer"], 
     [data-testid="stHeader"], 
     [data-testid="stSidebar"], 
     .main, .stApp, html, body {
-        background: radial-gradient(circle at top right, #16213E, #1A1A2E) !important;
-        color: #E2E2E2 !important;
-        font-family: 'Outfit', sans-serif;
+        background-color: #0E1117 !important;
+        color: #C9D1D9 !important;
+        font-family: 'Inter', sans-serif;
     }
 
-    /* 2. Glassmorphism for Metric Cards */
+    /* 2. Professional Metric Cards */
     [data-testid="stMetric"] {
-        background: rgba(255, 255, 255, 0.03) !important;
-        backdrop-filter: blur(10px) !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 20px !important;
-        padding: 25px !important;
-        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3) !important;
-        transition: transform 0.3s ease;
-    }
-    [data-testid="stMetric"]:hover {
-        transform: translateY(-5px);
-        border: 1px solid rgba(255, 215, 0, 0.3) !important;
-    }
-
-    /* 3. Golden Highlights for Values */
-    [data-testid="stMetricValue"] > div {
-        color: #FFD700 !important;
-        font-weight: 800 !important;
-        text-shadow: 0 0 15px rgba(255, 215, 0, 0.4) !important;
-        letter-spacing: -1px;
-    }
-    [data-testid="stMetricLabel"] > div {
-        color: #B8B8B8 !important;
-        text-transform: uppercase !important;
-        font-size: 0.8em !important;
-        letter-spacing: 2px !important;
-    }
-
-    /* 4. Sidebar - Modern Violet */
-    section[data-testid="stSidebar"] > div {
-        background-color: #0F0F1B !important;
-        border-right: 1px solid rgba(255, 255, 255, 0.05) !important;
-    }
-    [data-testid="stSidebar"] * {
-        color: #C1C1C1 !important;
-    }
-
-    /* 5. Headers & Titles */
-    h1, h2, h3 {
-        background: linear-gradient(90deg, #FFD700, #E94560);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 900 !important;
-    }
-
-    /* 6. The Command Card (Unified Strategy) */
-    .command-card {
-        background: rgba(255, 255, 255, 0.02);
-        backdrop-filter: blur(15px);
-        border: 2px solid rgba(255, 215, 0, 0.2);
-        padding: 35px;
-        border-radius: 24px;
-        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5);
-        margin-top: 30px;
-        position: relative;
-        overflow: hidden;
-    }
-    .command-card::before {
-        content: "";
-        position: absolute;
-        top: 0; left: 0;
-        width: 100%; height: 5px;
-        background: linear-gradient(90deg, #FFD700, #E94560);
+        background-color: #161B22 !important;
+        border: 1px solid #30363D !important;
+        border-radius: 12px !important;
+        padding: 20px !important;
+        box-shadow: 0 4px 0 rgba(0,0,0,0.1) !important;
     }
     
-    /* Input Styling */
-    div[data-baseweb="select"], input {
-        background-color: #16213E !important;
-        border: 1px solid rgba(255, 255, 255, 0.1) !important;
-        border-radius: 8px !important;
+    /* Metric Value - Emerald Glow */
+    [data-testid="stMetricValue"] > div {
+        color: #2EA043 !important;
+        font-weight: 700 !important;
+        font-size: 2rem !important;
+    }
+    [data-testid="stMetricLabel"] > div {
+        color: #8B949E !important;
+        text-transform: uppercase !important;
+        font-size: 0.75em !important;
+        font-weight: 600 !important;
+        letter-spacing: 0.1em !important;
+    }
+
+    /* 3. Headers & Decorations */
+    h1, h2, h3 {
+        color: #F0F6FC !important;
+        border-bottom: 2px solid #238636;
+        padding-bottom: 10px;
+        margin-bottom: 25px !important;
+    }
+
+    /* 4. The Action Card (Unified Strategy) */
+    .strategy-card {
+        background: #161B22;
+        border: 1px solid #30363D;
+        border-left: 6px solid #2EA043;
+        padding: 30px;
+        border-radius: 8px;
+        margin-top: 20px;
+    }
+    
+    /* Sidebar Cleanup */
+    [data-testid="stSidebar"] {
+        background-color: #010409 !important;
+        border-right: 1px solid #30363D !important;
+    }
+    
+    /* Button & Input Styling */
+    .stButton>button {
+        background-color: #238636 !important;
         color: white !important;
+        border-radius: 6px !important;
+        width: 100%;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -108,6 +89,7 @@ st.markdown("""
 @st.cache_data
 def load_and_clean_data():
     try:
+        # Handling the file path dynamically
         df = pd.read_csv('telecom_churn.csv')
         df = df.fillna(method='ffill')
         num_cols = df.select_dtypes(include=[np.number]).columns
@@ -117,7 +99,7 @@ def load_and_clean_data():
             df[col] = df[col].clip(q1 - 1.5*iqr, q3 + 1.5*iqr)
         return df
     except Exception as e:
-        st.error(f"Error loading data: {e}")
+        st.error(f"Error loading data: {e}. Check if telecom_churn.csv is in the path.")
         return None
 
 # ==========================================
@@ -130,7 +112,7 @@ def train_predictive_model(df):
     for col in data.select_dtypes(include=['object']):
         if 'date' not in col: data[col] = le.fit_transform(data[col].astype(str))
     
-    drop_cols = ['churn', 'customer_id']
+    drop_cols = ['churn', 'customer_id', 'date_of_registration']
     X = data.drop(columns=[c for c in drop_cols if c in data.columns], errors='ignore')
     y = data['churn']
     
@@ -158,10 +140,11 @@ def train_smart_clustering(df):
     
     names = {}
     for i, row in cluster_stats.iterrows():
-        if row['data_used'] > global_medians['data_used'] * 1.5: label = "Galactic User (Heavy Data)"
-        elif row['estimated_salary'] > global_medians['estimated_salary'] * 1.5: label = "Nebula Gold (Premium)"
-        elif row['calls_made'] > global_medians['calls_made'] * 1.5: label = "Solar Voice (High Caller)"
-        else: label = "Standard Satellite"
+        if row['data_used'] > global_medians['data_used'] * 1.5: label = "Heavy Data User"
+        elif row['estimated_salary'] > global_medians['estimated_salary'] * 1.5: label = "Premium High-Value"
+        elif row['calls_made'] > global_medians['calls_made'] * 1.5: label = "High Frequency Caller"
+        elif row['estimated_salary'] < global_medians['estimated_salary'] * 0.7: label = "Budget Conscious"
+        else: label = "Standard Household"
         names[i] = label
             
     return kmeans, scaler_c, cluster_features, names, cluster_labels
@@ -177,19 +160,19 @@ if df_raw is not None:
     df_raw['segment'] = df_raw['cluster_id'].map(seg_names)
 
 # ==========================================
-# MAIN COMMAND CENTER
+# MAIN DASHBOARD
 # ==========================================
-st.title("🛰️ AI STRATEGY COMMAND")
-st.write("---")
+st.title("� Telecom AI Retention Engine")
+st.markdown("### Strategic Analysis & Recommendation Desk")
 
-# Sidebar - High End
-st.sidebar.markdown("### 🎛️ CUSTOMER SEARCH")
-search_type = st.sidebar.radio("MODE", ["SELECT LIST", "CODE SCAN (ID)"])
+# Sidebar - Lookup
+st.sidebar.markdown("## 🔎 Customer Lookup")
+search_type = st.sidebar.radio("Analysis Mode", ["Scroll List", "Quick ID Search"])
 
-if search_type == "SELECT LIST":
-    selected_id = st.sidebar.selectbox("TARGET ID", df_raw['customer_id'].unique()[:500])
+if search_type == "Scroll List":
+    selected_id = st.sidebar.selectbox("Select Target ID", df_raw['customer_id'].unique()[:500])
 else:
-    id_input = st.sidebar.text_input("ENTRY CODE")
+    id_input = st.sidebar.text_input("Manual ID Entry")
     try: selected_id = int(id_input) if id_input else None
     except: selected_id = None
 
@@ -197,13 +180,13 @@ else:
 if selected_id in df_raw['customer_id'].values:
     user_data = df_raw[df_raw['customer_id'] == selected_id].iloc[0]
     
-    # ML Inference
+    # ML Prediction
     temp_df = df_raw.copy()
     le = LabelEncoder()
     for col in temp_df.select_dtypes(include=['object']):
         if 'date' not in col: temp_df[col] = le.fit_transform(temp_df[col].astype(str))
     
-    drop_ml = ['churn', 'customer_id', 'cluster_id', 'segment']
+    drop_ml = ['churn', 'customer_id', 'date_of_registration', 'cluster_id', 'segment']
     X_user = temp_df[temp_df['customer_id'] == selected_id].drop(columns=[c for c in drop_ml if c in temp_df.columns], errors='ignore')
     user_scaled = scaler_pred.transform(X_user)
     
@@ -212,11 +195,11 @@ if selected_id in df_raw['customer_id'].values:
     is_churn = model_pred.predict(user_scaled)[0]
     
     # Dashboard Grid
-    st.subheader("📡 SYSTEM TELEMETRY")
+    st.subheader("� Performance Indicators")
     m1, m2, m3 = st.columns(3)
-    m1.metric("CHURN PROBABILITY", f"{prob:.1%}")
-    m2.metric("COHORT SEGMENT", user_data['segment'])
-    m3.metric("MISSION STATUS", "🔴 RETENTION RISK" if is_churn == 1 else "🟢 STABLE ORBIT")
+    m1.metric("Predicted Churn Risk", f"{prob:.1%}")
+    m2.metric("Behavioral Segment", user_data['segment'])
+    m3.metric("Retention Status", "🔴 AT RISK" if is_churn == 1 else "🟢 STABLE")
     
     # AI STRATEGY ENGINE
     segment = user_data['segment']
@@ -227,61 +210,62 @@ if selected_id in df_raw['customer_id'].values:
     rationale = ""
     cost = 0
     
+    # LOGIC (REFINED)
     if is_churn == 0:
-        if "Nebula" in segment:
-            strategy = "EXCLUSIVE: TITANIUM LOYALTY PASS"
-            rationale = "High-value stable orbit. **Strategy**: Offer a personalized lifestyle concierge trial to permanently lock in this elite nebula cohort."
-            cost = 75
-        elif usage > 4000:
-            strategy = "UPGRADE: INFINITE BANDWIDTH XP"
-            rationale = "Heavy usage detected. **Strategy**: Proactively remove all data throttling to increase satisfaction and lifetime value."
+        if "Premium" in segment:
+            strategy = "VIP Appreciation Reward"
+            rationale = "Customer is high-value and stable. **Strategy**: Proactively offer a 12-month loyalty bundle with premium perk access."
+            cost = 50
+        elif usage > 5000:
+            strategy = "Infinite Data Upgrade"
+            rationale = "Heavy usage detected. **Strategy**: Move them to an unthrottled plan trial to increase long-term dependency."
             cost = 15
         else:
-            strategy = "TACTIC: SMART CARE SYNC"
-            rationale = "Healthy signal. **Strategy**: automated AI-generated relationship messages to maintain brand dominance."
+            strategy = "Personalized Care Sync"
+            rationale = "Healthy signal. **Strategy**: Maintain engagement with quarterly benefit summaries via AI messaging."
             cost = 2
     else:
-        if salary > 90000 and usage < 1500:
-            strategy = "RESCUE: PLAN OPTIMIZER PRO"
-            rationale = "Price/Value misalignment. Customer feels they are overpaying. **Strategy**: Propose a plan downgrade to lower churn probability while retaining base margin."
-            cost = 25
-        elif "Galactic" in segment:
-            strategy = "SHIELD: 90 DAYS DATA CREDIT"
-            rationale = "Heavy usage churn detected. **Strategy**: Massive data-specific credit to counteract cheaper competitive infrastructure."
-            cost = 150
+        if salary > 85000 and usage < 1500:
+            strategy = "Proactive Plan Downsell"
+            rationale = "Value-seeking behavior at risk. **Strategy**: Suggest a more economical plan to save the relationship without 100% loss."
+            cost = 20
+        elif "Heavy Data" in segment:
+            strategy = "Data Defense: 50% Loyalty Credit"
+            rationale = "At-risk heavy user. **Strategy**: Compete directly on price with a deep 6-month discount on data usage."
+            cost = 120
         elif "Budget" in segment:
-            strategy = "BRIDGE: $40 INSTANT RELIEF"
-            rationale = "Financial sensitivity. **Strategy**: One-time direct bill credit to solve the immediate economic churn threshold."
-            cost = 40
+            strategy = "Direct Incentive: $30 Bill Credit"
+            rationale = "Price sensitive. **Strategy**: A direct financial bridge to prevent immediate churn decision."
+            cost = 30
         else:
-            strategy = "DIRECT: PRIORITY COMMAND CALL"
-            rationale = "Complex churn indicators. **Strategy**: Personalized call from the VIP Escalation team to solve qualitative issues."
-            cost = 50
+            strategy = "Direct Expert Intervention"
+            rationale = "Complex churn indicators. **Strategy**: Escalation to a Retention Specialist for a personalized win-back call."
+            cost = 45
 
-    roi = ( (1500 if "Nebula" in segment else 750) * 0.45 ) - cost
+    # ROI Math
+    roi = ( (1200 if "Premium" in segment else 600) * 0.45 ) - cost
     
-    # THE COMMAND BOX
+    # UNIFIED STRATEGY CARD
     st.markdown(f"""
-    <div class="command-card">
-        <h2 style="color: #FFD700 !important; margin-top: 0; letter-spacing: 2px;">⚡ STRATEGIC COMMAND: {strategy}</h2>
-        <p style="font-size: 1.15em; line-height: 1.7; color: #D1D1D1 !important;">{rationale}</p>
-        <hr style="border: 0; border-top: 1px solid rgba(255, 215, 0, 0.15); margin: 25px 0;">
-        <div style="display: flex; gap: 60px;">
+    <div class="strategy-card">
+        <h2 style="color: #2EA043 !important; font-size: 1.5em; border-bottom: none; margin-bottom: 10px !important;">🎯 TARGET STRATEGY: {strategy}</h2>
+        <p style="font-size: 1.1em; line-height: 1.6; color: #C9D1D9 !important;">{rationale}</p>
+        <div style="display: flex; gap: 40px; margin-top: 25px;">
             <div>
-                <span style="color: #8B8B8B; font-size: 0.85em; font-weight: 700; letter-spacing: 1.5px;">EST. COST</span><br>
-                <span style="color: #FFFFFF; font-size: 1.7em; font-weight: 900;">${cost}</span>
+                <span style="color: #8B949E; font-size: 0.8em; font-weight: bold;">EST. COST</span><br>
+                <span style="color: #F0F6FC; font-size: 1.5em; font-weight: 900;">${cost}</span>
             </div>
             <div>
-                <span style="color: #8B8B8B; font-size: 0.85em; font-weight: 700; letter-spacing: 1.5px;">PROJECTED IMPACT (ANNUAL ROI)</span><br>
-                <span style="color: #FF007A; font-size: 1.7em; font-weight: 900;">${roi:,.2f}</span>
+                <span style="color: #8B949E; font-size: 0.8em; font-weight: bold;">ANNUAL ROI IMPACT</span><br>
+                <span style="color: #2EA043; font-size: 1.5em; font-weight: 900;">${roi:,.2f}</span>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    with st.expander("📂 VIEW RAW TELEMETRY DATA"):
-        st.write(user_data.to_frame().T)
+    with st.expander("� Raw Customer Telemetry"):
+        st.dataframe(user_data.to_frame().T)
 
 else:
-    if selected_id: st.warning("ID NOT FOUND")
-    else: st.info("�️ SYSTEM ONLINE. SPECIFY TARGET CUSTOMER ID IN SIDEBAR.")
+    if selected_id: st.warning("Customer ID not found.")
+    else: st.info("👋 Select or Search for a Customer ID in the sidebar to begin.")
