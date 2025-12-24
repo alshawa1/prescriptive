@@ -13,39 +13,43 @@ from sklearn.cluster import KMeans
 # ==========================================
 st.set_page_config(page_title="Telecom Strategic AI", layout="wide", page_icon="🎯")
 
-# Custom CSS for high contrast and coordination
+# Custom CSS for a Sleek Dark Premium Design
 st.markdown("""
 <style>
-    /* High Contrast Text */
-    .main .block-container h1, .main .block-container h2, .main .block-container h3, .main .block-container p, .main .block-container span {
-        color: #0F172A !important;
+    /* Dark Background and High Contrast */
+    .stApp {
+        background-color: #0F172A;
+        color: #E2E8F0;
     }
     
-    /* Sidebar Text visibility */
+    /* Headers */
+    h1, h2, h3 {
+        color: #F8FAFC !important;
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Sidebar Dark */
+    [data-testid="stSidebar"] {
+        background-color: #1E293B !important;
+    }
     [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
-        color: #1E293B !important;
+        color: #F1F5F9 !important;
     }
 
-    /* Metric Card Improvements */
+    /* Metric Card Dark Premium */
     [data-testid="stMetric"] {
-        background-color: #FFFFFF !important;
-        border: 1px solid #E2E8F0 !important;
+        background-color: #1E293B !important;
+        border: 1px solid #334155 !important;
         padding: 20px !important;
         border-radius: 12px !important;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
+        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
     }
     [data-testid="stMetricValue"] > div {
-        color: #2563EB !important;
+        color: #38BDF8 !important;
+        text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
     }
     [data-testid="stMetricLabel"] > div {
-        color: #64748B !important;
-    }
-
-    /* Strategy Box Styling */
-    .stSuccess {
-        background-color: #F0FDF4 !important;
-        border: 1px solid #BBF7D0 !important;
-        color: #166534 !important;
+        color: #94A3B8 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -215,20 +219,20 @@ if selected_id in df_raw['customer_id'].values:
             ai_justification = "Behavioral driver unclear. **Best Strategy**: Direct reach-out from manager with an open-ended credit offer to diagnose and solve dissatisfaction."
             est_cost = 40
 
-    # --- Unified Strategy Card ---
+    # --- Unified Strategy Card (Dark Mode Edition) ---
     st.markdown(f"""
-    <div style="background-color: #F0FDF4; border: 1px solid #BBF7D0; padding: 25px; border-radius: 15px;">
-        <h3 style="color: #166534; margin-top: 0;">🚀 RECOMMENDED STRATEGY: {strategy_title}</h3>
-        <p style="color: #1E293B; font-size: 1.1em; line-height: 1.6;">{ai_justification}</p>
-        <hr style="border: 0; border-top: 1px solid #BBF7D0; margin: 20px 0;">
+    <div style="background-color: #1E293B; border: 2px solid #10B981; padding: 25px; border-radius: 15px; box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);">
+        <h3 style="color: #10B981; margin-top: 0; text-shadow: 0 0 5px rgba(16, 185, 129, 0.3);">🚀 RECOMMENDED STRATEGY: {strategy_title}</h3>
+        <p style="color: #F1F5F9; font-size: 1.1em; line-height: 1.6;">{ai_justification}</p>
+        <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
         <div style="display: flex; gap: 40px;">
             <div>
-                <span style="color: #64748B; font-weight: 600; text-transform: uppercase; font-size: 0.85em;">Estimated Cost</span><br>
-                <span style="color: #0F172A; font-size: 1.4em; font-weight: 700;">${est_cost}</span>
+                <span style="color: #94A3B8; font-weight: 600; text-transform: uppercase; font-size: 0.85em;">Estimated Cost</span><br>
+                <span style="color: #F8FAFC; font-size: 1.4em; font-weight: 700;">${est_cost}</span>
             </div>
             <div>
-                <span style="color: #64748B; font-weight: 600; text-transform: uppercase; font-size: 0.85em;">Projected ROI</span><br>
-                <span style="color: #166534; font-size: 1.4em; font-weight: 700;">${roi:.2f}</span>
+                <span style="color: #94A3B8; font-weight: 600; text-transform: uppercase; font-size: 0.85em;">Projected ROI</span><br>
+                <span style="color: #10B981; font-size: 1.4em; font-weight: 700;">${roi:.2f}</span>
             </div>
         </div>
     </div>
