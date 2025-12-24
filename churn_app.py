@@ -13,6 +13,21 @@ from sklearn.cluster import KMeans
 # ==========================================
 st.set_page_config(page_title="Telecom AI Dashboard", layout="wide", page_icon="📡")
 
+# Custom CSS for better UI
+st.markdown("""
+<style>
+    .main {
+        background-color: #f5f7f9;
+    }
+    .stMetric {
+        background-color: #ffffff;
+        padding: 15px;
+        border-radius: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    }
+</style>
+""", unsafe_allow_html=True)
+
 # ==========================================
 # 1. DATA LOADING & CLEANING (Cached)
 # ==========================================
@@ -75,11 +90,13 @@ def train_smart_clustering(df):
     
     # K-Means
     kmeans = KMeans(n_clusters=4, random_state=42)
-    df['cluster_id'] = kmeans.fit_predict(X_scaled)
+    cluster_labels = kmeans.fit_predict(X_scaled)
     
-    # Dynamic Cluster Naming based on medians
-    cluster_stats = df.groupby('cluster_id')[cluster_features].median()
-    global_medians = df[cluster_features].median()
+    # Create a temp DF to calculate medians
+    df_temp = X_c.copy()
+    df_temp['cluster_id'] = cluster_labels
+    cluster_stats = df_temp.groupby('cluster_id').median()
+    global_medians = X_c.median()
     
     names = {}
     for i, row in cluster_stats.iterrows():
@@ -94,7 +111,7 @@ def train_smart_clustering(df):
         else:
             names[i] = "Standard Household"
             
-    return kmeans, scaler_c, cluster_features, names
+    return kmeans, scaler_c, cluster_features, names, cluster_labels
 
 # ==========================================
 # MAIN INITIALIZATION
@@ -102,12 +119,14 @@ def train_smart_clustering(df):
 df_raw = load_and_clean_data()
 if df_raw is not None:
     model_pred, scaler_pred, feature_list = train_predictive_model(df_raw)
-    kmeans, scaler_cluster, c_features, seg_names = train_smart_clustering(df_raw)
+    kmeans, scaler_cluster, c_features, seg_names, cluster_ids = train_smart_clustering(df_raw)
+    df_raw['cluster_id'] = cluster_ids
+    df_raw['segment'] = df_raw['cluster_id'].map(seg_names)
 
 # ==========================================
 # APP UI
 # ==========================================
-st.title("� Telecom Intelligence & Retention Platform")
+st.title("📡 Telecom Intelligence & Retention Platform")
 
 nav = st.sidebar.radio("Go To", ["Data Exploration", "Churn Prediction & AI Strategy"])
 
@@ -117,121 +136,128 @@ if nav == "Data Exploration":
     with c1:
         st.subheader("Churn Overview")
         st.write(df_raw['churn'].value_counts(normalize=True).map(lambda x: f"{x:.1%}"))
-        fig, ax = plt.subplots(figsize=(7,4))
+        fig, ax = plt.subplots(figsize=(8,5), dpi=100)
         sns.countplot(x='churn', data=df_raw, palette='viridis', ax=ax)
-        plt.title("Distribution of Churn (Target Variable)")
-        plt.xlabel("Churned? (0=No, 1=Yes)")
-        plt.ylabel("Number of Customers")
+        ax.set_title("Distribution of Churn (Target Variable)", fontsize=12)
+        ax.set_xlabel("Churned? (0=No, 1=Yes)", fontsize=10)
+        ax.set_ylabel("Number of Customers", fontsize=10)
+        plt.tight_layout()
         st.pyplot(fig)
     with c2:
         st.subheader("Top Drivers of Churn")
         num_df = df_raw.select_dtypes(include=[np.number])
         corr = num_df.corr()['churn'].sort_values(ascending=False).drop('churn').head(7)
+        st.info("Features with strongest correlation to leaving")
         st.bar_chart(corr)
 
     st.subheader("Customer Behavioral Segments")
-    df_raw['segment'] = df_raw['cluster_id'].map(seg_names)
-    fig2, ax2 = plt.subplots(figsize=(12,5))
-    sns.countplot(x='segment', data=df_raw, palette='magma', ax=ax2)
-    plt.title("Distribution of AI-Generated Customer Segments")
-    plt.xticks(rotation=15)
-    plt.xlabel("Customer Segment")
-    plt.ylabel("Count")
+    fig2, ax2 = plt.subplots(figsize=(10,5), dpi=100)
+    sns.countplot(y='segment', data=df_raw, palette='magma', ax=ax2)
+    ax2.set_title("Distribution of AI-Generated Customer Segments", fontsize=12)
+    ax2.set_xlabel("Count", fontsize=10)
+    ax2.set_ylabel("Customer Segment", fontsize=10)
+    plt.tight_layout()
     st.pyplot(fig2)
 
 elif nav == "Churn Prediction & AI Strategy":
     st.header("2. Predictive & Prescriptive Analysis")
     
-    cust_list = df_raw['customer_id'].unique()[:100]
-    selected_id = st.selectbox("Select Customer ID to Analyze", cust_list)
+    st.subheader("Enter Customer Code / Select ID")
+    search_type = st.radio("Search By:", ["Select List", "Manual Entry"])
     
-    user_data = df_raw[df_raw['customer_id'] == selected_id].iloc[0]
-    
-    # --- PREDICTION ---
-    # Prep for pred model
-    temp_df = df_raw.copy()
-    le = LabelEncoder()
-    for col in temp_df.select_dtypes(include=['object']):
-        if 'date' not in col: temp_df[col] = le.fit_transform(temp_df[col].astype(str))
-    
-    X_user = temp_df[temp_df['customer_id'] == selected_id].drop(columns=['churn', 'customer_id', 'date_of_registration', 'usage_intensity', 'cluster_id', 'segment'], errors='ignore')
-    user_scaled = scaler_pred.transform(X_user)
-    
-    # Robust Prediction
-    probs = model_pred.predict_proba(user_scaled)[0]
-    if len(probs) > 1:
-        prob = probs[1]
+    if search_type == "Select List":
+        selected_id = st.selectbox("Select Customer ID", df_raw['customer_id'].unique()[:500])
     else:
-        # Handle case where only one class exists in training/model
-        prob = 1.0 if model_pred.classes_[0] == 1 else 0.0
-        
-    is_churn = model_pred.predict(user_scaled)[0]
-    
-    st.write("---")
-    res1, res2, res3 = st.columns(3)
-    res1.metric("Predicted Churn Risk", f"{prob:.1%}")
-    res2.metric("Customer Segment", user_data['segment'] if 'segment' in user_data else "Standard")
-    res3.metric("Customer Status", "🔴 RISK" if is_churn == 1 else "🟢 STABLE")
-    
-    # --- RECOMMENDATION LOGIC ---
-    st.subheader("💡 Strategic Recommendation")
-    
-    segment = user_data['segment'] if 'segment' in user_data else "Standard"
-    usage = user_data['data_used']
-    salary = user_data['estimated_salary']
-    
-    rec_title = ""
-    reasoning = ""
-    est_cost = 0
-    
-    if is_churn == 0:
-        # Retention/Loyalty
-        if "High-Value" in segment:
-            rec_title = "Action: VIP Appreciation Offer"
-            reasoning = "Customer is high-value and stable. Lock them in with an exclusive 12-month loyalty bonus to ensure long-term retention."
-            est_cost = 50
-        elif usage > df_raw['data_used'].median() * 1.5:
-            rec_title = "Action: Priority Speed Upgrade"
-            reasoning = "Happy heavy user. Offering a free speed priority trial improves satisfaction and prepares them for an upsell."
-            est_cost = 5
-        else:
-            rec_title = "Action: Standard Engagement"
-            reasoning = "Healthy customer relationship. Use personalized content to maintain brand top-of-mind."
-            est_cost = 1
-    else:
-        # CHURN PREVENTION (High Risk)
-        # 1. Check for "Overpaying" logic (High Salary + Low Usage)
-        if salary > df_raw['estimated_salary'].median() * 1.2 and usage < df_raw['data_used'].median() * 0.5:
-            rec_title = "Action: Plan Optimization (Downsell to Save)"
-            reasoning = "Customer has high potential but low usage. They likely feel they are overpaying. Proactively suggest a 'Smart Saver' plan to prevent churn."
-            est_cost = 20
-        # 2. Check for "Usage Stress" logic (Heavy Data User)
-        elif "Heavy Data" in segment:
-            rec_title = "Action: 40% Data Discount (6 Months)"
-            reasoning = "High data usage is their primary value. They are likely leaving for a cheaper data competitor. Neutralize the price threat."
-            est_cost = 120
-        # 3. Budget Conscious
-        elif "Budget" in segment:
-             rec_title = "Action: Cashback / Bill Credit"
-             reasoning = "Price is the main driver. A one-time bill credit of $25 can bridge the gap for another quarter."
-             est_cost = 25
-        else:
-            rec_title = "Action: Personalized Win-Back Call"
-            reasoning = "Risk detected without clear usage driver. A human touch/direct feedback call with a flexible 1-month-free credit is recommended."
-            est_cost = 40
+        selected_id_input = st.text_input("Type Customer ID Code (e.g. 1, 10, 50)")
+        try:
+            selected_id = int(selected_id_input) if selected_id_input else None
+        except ValueError:
+            st.error("Please enter a valid numeric ID")
+            selected_id = None
 
-    st.info(f"### {rec_title}")
-    with st.expander("🔍 Strategic Justification", expanded=True):
-        st.write(f"**Segment Behavior**: {segment}")
-        st.write(f"**AI Reasoning**: {reasoning}")
-        st.markdown(f"**Estimated Cost**: `${est_cost}`")
+    if selected_id in df_raw['customer_id'].values:
+        user_data = df_raw[df_raw['customer_id'] == selected_id].iloc[0]
+        
+        st.write("### 👤 Customer Profile")
+        st.dataframe(user_data.to_frame().T)
+        
+        # --- PREDICTION ---
+        temp_df = df_raw.copy()
+        le = LabelEncoder()
+        for col in temp_df.select_dtypes(include=['object']):
+            if 'date' not in col: temp_df[col] = le.fit_transform(temp_df[col].astype(str))
+        
+        # Consistent drop set
+        drop_for_ml = ['churn', 'customer_id', 'date_of_registration', 'usage_intensity', 'cluster_id', 'segment']
+        X_user = temp_df[temp_df['customer_id'] == selected_id].drop(columns=[c for c in drop_for_ml if c in temp_df.columns], errors='ignore')
+        user_scaled = scaler_pred.transform(X_user)
+        
+        # Robust Prediction
+        probs = model_pred.predict_proba(user_scaled)[0]
+        prob = probs[1] if len(probs) > 1 else (1.0 if model_pred.classes_[0] == 1 else 0.0)
+        is_churn = model_pred.predict(user_scaled)[0]
+        
+        st.write("---")
+        res1, res2, res3 = st.columns(3)
+        res1.metric("Predicted Churn Risk", f"{prob:.1%}")
+        res2.metric("Customer Segment", user_data['segment'], help="Segment identified by K-Means based on behavior")
+        res3.metric("Customer Status", "🔴 RISK" if is_churn == 1 else "🟢 STABLE")
+        
+        # --- RECOMMENDATION LOGIC ---
+        st.subheader("💡 Strategic Recommendation (Prescriptive)")
+        
+        segment = user_data['segment']
+        usage = user_data['data_used']
+        salary = user_data['estimated_salary']
+        
+        rec_title = ""
+        reasoning = ""
+        est_cost = 0
+        
+        if is_churn == 0:
+            if "High-Value" in segment:
+                rec_title = "Action: VIP Appreciation Offer"
+                reasoning = "Customer is high-value and stable. Lock them in with an exclusive 12-month loyalty bonus."
+                est_cost = 50
+            elif usage > df_raw['data_used'].median() * 1.5:
+                rec_title = "Action: Priority Speed Upgrade"
+                reasoning = "Satisfied heavy user. Offering a speed trial improves retention and sets up upsell."
+                est_cost = 5
+            else:
+                rec_title = "Action: Standard Engagement"
+                reasoning = "Healthy relationship. Maintain brand presence with personalized weekly tips."
+                est_cost = 1
+        else:
+            if salary > df_raw['estimated_salary'].median() * 1.2 and usage < df_raw['data_used'].median() * 0.5:
+                rec_title = "Action: Plan Optimization (Downgrade Save)"
+                reasoning = "Customer is high potential but low usage. Likely overpaying. Suggesting a cheaper plan saves the client."
+                est_cost = 20
+            elif "Heavy Data" in segment:
+                rec_title = "Action: 40% Data Discount (6 Months)"
+                reasoning = "They need data but price is a threat. Neutralize competitors with aggressive discounting."
+                est_cost = 120
+            elif "Budget" in segment:
+                 rec_title = "Action: $25 Instant Bill Credit"
+                 reasoning = "Price sensitive user. A bridge credit buys time and stops immediate churn."
+                 est_cost = 25
+            else:
+                rec_title = "Action: Win-Back Feedback Call"
+                reasoning = "Risk without clear behavior driver. Human reach-out with flexible credit is best."
+                est_cost = 40
+
+        st.success(f"### {rec_title}")
+        with st.expander("🔍 Strategic Justification & Prescriptive Details", expanded=True):
+            st.write(f"**Customer Segment**: {segment}")
+            st.write(f"**AI Decision Reasoning**: {reasoning}")
+            st.write(f"**Monthly Usage Context**: {usage:.1f} MB | Salary Context: ${salary:,.0f}")
+        
+        # Financial Impact
+        st.subheader("💰 Annual ROI Projection")
+        base_val = 600
+        if "High-Value" in segment: base_val = 1200
+        saved_val = base_val * 0.45 
+        net_roi = saved_val - est_cost
+        st.metric("Estimated Net ROI", f"${net_roi:.2f}")
     
-    # Financial Projection
-    st.subheader("💰 Financial Impact")
-    base_val = 600 # Assume $50/mo
-    if "High-Value" in segment: base_val = 1200
-    
-    saved_val = base_val * 0.45 # Assumption of 45% effectiveness
-    net_roi = saved_val - est_cost
-    
-    st.metric("Expected Net ROI (Annual)", f"${net_roi:.2f}")
+    elif selected_id is not None:
+        st.warning("Customer ID not found in the dataset range.")
