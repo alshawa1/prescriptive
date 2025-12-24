@@ -9,82 +9,57 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.cluster import KMeans
 
 # ==========================================
-# PAGE CONFIG & MODERN MINIMALIST DARK THEME
+# PAGE CONFIG & ABSOLUTE DARK THEME
 # ==========================================
 st.set_page_config(page_title="Telecom AI Strategy", layout="wide", page_icon="📡")
 
-# Robust Modern Dark CSS
+# --- NUCLEAR DARK THEME ENFORCEMENT ---
 st.markdown("""
 <style>
-    /* 1. Force background on every possible container */
-    [data-testid="stAppViewContainer"], 
-    [data-testid="stHeader"], 
-    [data-testid="stSidebar"], 
-    [data-testid="stAppViewBlockContainer"],
-    .main, .stApp, html, body {
+    /* 1. Global Background - Deep Graphite */
+    .stApp, [data-testid="stAppViewContainer"], [data-testid="stHeader"], [data-testid="stSidebar"], [data-testid="stAppViewBlockContainer"] {
         background-color: #0E1117 !important;
-        color: #C9D1D9 !important;
+        background: #0E1117 !important;
     }
 
-    /* 2. Professional Metric Cards - Explicitly Dark */
+    /* 2. Text Visibility - Force High Contrast White */
+    h1, h2, h3, h4, h5, h6, p, span, label, .stMarkdown, .stSelectbox label, .stTextInput label {
+        color: #F0F6FC !important;
+    }
+
+    /* 3. Metric Cards - Dark & Defined */
     [data-testid="stMetric"] {
         background-color: #161B22 !important;
         border: 1px solid #30363D !important;
         border-radius: 12px !important;
         padding: 20px !important;
-        box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
     }
-    
-    /* Metric Value - Emerald High Contrast */
-    [data-testid="stMetricValue"] > div {
-        color: #39D353 !important;
-        font-weight: 700 !important;
-        font-size: 2.2rem !important;
-    }
-    [data-testid="stMetricLabel"] > div {
-        color: #F0F6FC !important;
-        text-transform: uppercase !important;
-        font-size: 0.8em !important;
-        font-weight: 600 !important;
-        letter-spacing: 0.1em !important;
-    }
+    [data-testid="stMetricValue"] > div { color: #39D353 !important; font-weight: 700 !important; }
+    [data-testid="stMetricLabel"] > div { color: #8B949E !important; text-transform: uppercase !important; }
 
-    /* 3. Headers - High Contrast */
-    h1, h2, h3, h4, .stMarkdown p {
-        color: #F0F6FC !important;
-    }
-    
-    h1, h2, h3 {
-        border-bottom: 2px solid #238636;
-        padding-bottom: 10px;
-        margin-bottom: 25px !important;
-    }
-
-    /* 4. The Action Card (Unified Strategy) */
+    /* 4. Unified Strategy Card - Emerald Bordered */
     .strategy-card {
         background: #161B22;
         border: 1px solid #30363D;
         border-left: 6px solid #2EA043;
         padding: 30px;
-        border-radius: 8px;
-        margin-top: 20px;
+        border-radius: 10px;
+        margin: 25px 0;
     }
     
-    /* Sidebar Cleanup */
-    [data-testid="stSidebar"] {
-        background-color: #010409 !important;
-        border-right: 1px solid #30363D !important;
-    }
-    
-    /* Button & Input Styling */
-    .stButton>button {
-        background-color: #238636 !important;
+    /* Input Styling */
+    div[data-baseweb="select"], input {
+        background-color: #21262D !important;
         color: white !important;
-        border-radius: 6px !important;
-        width: 100%;
+        border: 1px solid #30363D !important;
     }
 </style>
 """, unsafe_allow_html=True)
+
+# SIDEBAR STATUS
+st.sidebar.success("✅ **SYSTEM v5.5: NUCLEAR DARK LOADED**")
+st.sidebar.info("💡 **PRO-TIP**: If the background is still white on the website, you must **Commit and Push** these changes to GitHub.")
 
 # ==========================================
 # 1. DATA CORE (Cached)
@@ -92,7 +67,6 @@ st.markdown("""
 @st.cache_data
 def load_and_clean_data():
     try:
-        # Handling the file path dynamically
         df = pd.read_csv('telecom_churn.csv')
         df = df.fillna(method='ffill')
         num_cols = df.select_dtypes(include=[np.number]).columns
@@ -102,7 +76,7 @@ def load_and_clean_data():
             df[col] = df[col].clip(q1 - 1.5*iqr, q3 + 1.5*iqr)
         return df
     except Exception as e:
-        st.error(f"Error loading data: {e}. Check if telecom_churn.csv is in the path.")
+        st.error(f"Error loading data: {e}. Check if telecom_churn.csv is present.")
         return None
 
 # ==========================================
@@ -139,14 +113,12 @@ def train_smart_clustering(df):
     df_temp = X_c.copy()
     df_temp['cluster_id'] = cluster_labels
     cluster_stats = df_temp.groupby('cluster_id').median()
-    global_medians = X_c.median()
     
     names = {}
     for i, row in cluster_stats.iterrows():
-        if row['data_used'] > global_medians['data_used'] * 1.5: label = "Heavy Data User"
-        elif row['estimated_salary'] > global_medians['estimated_salary'] * 1.5: label = "Premium High-Value"
-        elif row['calls_made'] > global_medians['calls_made'] * 1.5: label = "High Frequency Caller"
-        elif row['estimated_salary'] < global_medians['estimated_salary'] * 0.7: label = "Budget Conscious"
+        if row['data_used'] > df_temp['data_used'].median() * 1.5: label = "Heavy Data User"
+        elif row['estimated_salary'] > df_temp['estimated_salary'].median() * 1.5: label = "Premium High-Value"
+        elif row['calls_made'] > df_temp['calls_made'].median() * 1.2: label = "High Frequency Caller"
         else: label = "Standard Household"
         names[i] = label
             
@@ -165,25 +137,25 @@ if df_raw is not None:
 # ==========================================
 # MAIN DASHBOARD
 # ==========================================
-st.title("� Telecom AI Retention Engine")
-st.markdown("### Strategic Analysis & Recommendation Desk")
+st.title("📡 Telecom AI Retention Strategy")
+st.write("---")
 
-# Sidebar - Lookup
-st.sidebar.markdown("## 🔎 Customer Lookup")
-search_type = st.sidebar.radio("Analysis Mode", ["Scroll List", "Quick ID Search"])
+# Customer Lookup
+st.sidebar.markdown("## � Target Analysis")
+search_type = st.sidebar.radio("Method", ["Select ID", "Manual Entry"])
 
-if search_type == "Scroll List":
-    selected_id = st.sidebar.selectbox("Select Target ID", df_raw['customer_id'].unique()[:500])
+if search_type == "Select ID":
+    selected_id = st.sidebar.selectbox("Choose ID", df_raw['customer_id'].unique()[:500])
 else:
-    id_input = st.sidebar.text_input("Manual ID Entry")
+    id_input = st.sidebar.text_input("Enter ID Code")
     try: selected_id = int(id_input) if id_input else None
     except: selected_id = None
 
-# ACTION CENTER
+# PROCESS RESULTS
 if selected_id in df_raw['customer_id'].values:
     user_data = df_raw[df_raw['customer_id'] == selected_id].iloc[0]
     
-    # ML Prediction
+    # Inference
     temp_df = df_raw.copy()
     le = LabelEncoder()
     for col in temp_df.select_dtypes(include=['object']):
@@ -197,78 +169,69 @@ if selected_id in df_raw['customer_id'].values:
     prob = probs[1] if len(probs) > 1 else (1.0 if model_pred.classes_[0] == 1 else 0.0)
     is_churn = model_pred.predict(user_scaled)[0]
     
-    # Dashboard Grid
-    st.subheader("� Performance Indicators")
-    m1, m2, m3 = st.columns(3)
-    m1.metric("Predicted Churn Risk", f"{prob:.1%}")
-    m2.metric("Behavioral Segment", user_data['segment'])
-    m3.metric("Retention Status", "🔴 AT RISK" if is_churn == 1 else "🟢 STABLE")
+    # Metrics
+    st.subheader("📈 Real-time System Analytics")
+    c1, c2, c3 = st.columns(3)
+    c1.metric("Predicted Risk", f"{prob:.1%}")
+    c2.metric("Behavioral Cohort", user_data['segment'])
+    c3.metric("Current Status", "🔴 AT RISK" if is_churn == 1 else "🟢 STABLE")
     
-    # AI STRATEGY ENGINE
+    # Logic
     segment = user_data['segment']
     usage = user_data['data_used']
     salary = user_data['estimated_salary']
     
-    strategy = ""
-    rationale = ""
-    cost = 0
+    strategy = "Priority Support"
+    rationale = "General churn risk detected."
+    cost = 40
     
-    # LOGIC (REFINED)
     if is_churn == 0:
         if "Premium" in segment:
-            strategy = "VIP Appreciation Reward"
-            rationale = "Customer is high-value and stable. **Strategy**: Proactively offer a 12-month loyalty bundle with premium perk access."
-            cost = 50
-        elif usage > 5000:
-            strategy = "Infinite Data Upgrade"
-            rationale = "Heavy usage detected. **Strategy**: Move them to an unthrottled plan trial to increase long-term dependency."
-            cost = 15
+            strategy = "VIP Loyalty Rewards"
+            rationale = "Elite customer. **Strategy**: Offer exclusive event access and zero-cost equipment upgrades."
+            cost = 60
         else:
-            strategy = "Personalized Care Sync"
-            rationale = "Healthy signal. **Strategy**: Maintain engagement with quarterly benefit summaries via AI messaging."
+            strategy = "Automated Relationship Sync"
+            rationale = "Stable patterns. **Strategy**: Maintain engagement via personalized AI value summaries."
             cost = 2
     else:
-        if salary > 85000 and usage < 1500:
-            strategy = "Proactive Plan Downsell"
-            rationale = "Value-seeking behavior at risk. **Strategy**: Suggest a more economical plan to save the relationship without 100% loss."
-            cost = 20
-        elif "Heavy Data" in segment:
-            strategy = "Data Defense: 50% Loyalty Credit"
-            rationale = "At-risk heavy user. **Strategy**: Compete directly on price with a deep 6-month discount on data usage."
-            cost = 120
-        elif "Budget" in segment:
-            strategy = "Direct Incentive: $30 Bill Credit"
-            rationale = "Price sensitive. **Strategy**: A direct financial bridge to prevent immediate churn decision."
-            cost = 30
+        if "Heavy Data" in segment:
+            strategy = "Infinite Data Loyalty Grant"
+            rationale = "High usage at risk. **Strategy**: Add 50GB bonus data per month for 12 months."
+            cost = 100
+        elif salary > 80000 and usage < 1000:
+            strategy = "Value Recovery Downsell"
+            rationale = "Customer is overpaying. **Strategy**: Proactively migrate to a cheaper plan to save the relationship."
+            cost = 25
         else:
-            strategy = "Direct Expert Intervention"
-            rationale = "Complex churn indicators. **Strategy**: Escalation to a Retention Specialist for a personalized win-back call."
+            strategy = "Retention Specialist Direct"
+            rationale = "Behavioral instability. **Strategy**: Personalized human outreach with a flexi-credit offer."
             cost = 45
 
-    # ROI Math
-    roi = ( (1200 if "Premium" in segment else 600) * 0.45 ) - cost
+    roi = ( (1200 if "Premium" in segment else 600) * 0.50 ) - cost
     
-    # UNIFIED STRATEGY CARD
+    # Strategy Card
     st.markdown(f"""
     <div class="strategy-card">
-        <h2 style="color: #2EA043 !important; font-size: 1.5em; border-bottom: none; margin-bottom: 10px !important;">🎯 TARGET STRATEGY: {strategy}</h2>
-        <p style="font-size: 1.1em; line-height: 1.6; color: #C9D1D9 !important;">{rationale}</p>
-        <div style="display: flex; gap: 40px; margin-top: 25px;">
+        <h2 style="color: #39D353 !important; margin-top: 0; border-bottom: none;">� ACTION: {strategy}</h2>
+        <p style="font-size: 1.1em; line-height: 1.6; color: #F0F6FC !important;">{rationale}</p>
+        <hr style="border: 0; border-top: 1px solid #30363D; margin: 20px 0;">
+        <div style="display: flex; gap: 40px;">
             <div>
-                <span style="color: #8B949E; font-size: 0.8em; font-weight: bold;">EST. COST</span><br>
-                <span style="color: #F0F6FC; font-size: 1.5em; font-weight: 900;">${cost}</span>
+                <span style="color: #8B949E; font-size: 0.8em; font-weight: 700;">IMPLEMENTATION COST</span><br>
+                <span style="color: #FFFFFF; font-size: 1.5em; font-weight: 900;">${cost}</span>
             </div>
             <div>
-                <span style="color: #8B949E; font-size: 0.8em; font-weight: bold;">ANNUAL ROI IMPACT</span><br>
-                <span style="color: #2EA043; font-size: 1.5em; font-weight: 900;">${roi:,.2f}</span>
+                <span style="color: #8B949E; font-size: 0.8em; font-weight: 700;">ESTIMATED ANNUAL ROI</span><br>
+                <span style="color: #39D353; font-size: 1.5em; font-weight: 900;">${roi:,.2f}</span>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    with st.expander("� Raw Customer Telemetry"):
+    with st.expander("📂 Raw Telemetry Data"):
         st.dataframe(user_data.to_frame().T)
 
 else:
-    if selected_id: st.warning("Customer ID not found.")
-    else: st.info("👋 Select or Search for a Customer ID in the sidebar to begin.")
+    if selected_id: st.warning("ID Code Not Found.")
+    else: st.info("👋 System Ready. Select or type a Customer ID in the sidebar to start analysis.")
