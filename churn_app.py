@@ -9,56 +9,69 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.cluster import KMeans
 
 # ==========================================
-# PAGE CONFIG & PREMIUM LIGHT THEME
+# PAGE CONFIG & NUCLEAR DARK THEME
 # ==========================================
 st.set_page_config(page_title="Telecom Strategic AI", layout="wide", page_icon="🎯")
 
-# Custom CSS for a Robust Premium Dark Design
+# Aggressive CSS to force Dark Mode regardless of system settings
 st.markdown("""
 <style>
-    /* Force Dark Theme on everything */
-    html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], [data-testid="stSidebar"] {
-        background-color: #0F172A !important;
-        color: #F1F5F9 !important;
-    }
-    
-    /* Main Content Container */
-    .main .block-container {
-        background-color: #0F172A !important;
-        border-radius: 20px;
-    }
-
-    /* Headers - Maximum Contrast */
-    h1, h2, h3, h4, h5, h6, .stMarkdown p {
+    /* Force background on ALL potential overlays and containers */
+    [data-testid="stAppViewContainer"], 
+    [data-testid="stHeader"], 
+    [data-testid="stSidebar"], 
+    .main, 
+    .stApp,
+    html, body {
+        background-color: #0B0E14 !important;
         color: #F8FAFC !important;
     }
 
-    /* Metric Boxes - Glowing Dark Card */
-    [data-testid="stMetric"] {
-        background-color: #1E293B !important;
-        border: 2px solid #334155 !important;
-        border-radius: 16px !important;
-        padding: 20px !important;
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
-    }
-    [data-testid="stMetricValue"] > div {
-        color: #38BDF8 !important;
-        font-weight: 800 !important;
-        text-shadow: 0 0 12px rgba(56, 189, 248, 0.5) !important;
-    }
-    [data-testid="stMetricLabel"] > div {
-        color: #94A3B8 !important;
-        font-weight: 600 !important;
-        text-transform: uppercase !important;
-        letter-spacing: 0.05em !important;
+    /* Target the specific sidebar container */
+    section[data-testid="stSidebar"] > div {
+        background-color: #161B22 !important;
     }
 
-    /* Sidebar Contrast Fix */
-    [data-testid="stSidebarNav"] {
-        background-color: #1E293B !important;
+    /* Force all text in the app and sidebar to be bright white/off-white */
+    p, span, label, h1, h2, h3, h4, .stMarkdown, .stSelectbox label, .stTextInput label {
+        color: #F8FAFC !important;
     }
-    [data-testid="stSidebar"] * {
-        color: #F1F5F9 !important;
+
+    /* Metric Card - Dark Industrial Style */
+    [data-testid="stMetric"] {
+        background-color: #1C2128 !important;
+        border: 2px solid #30363D !important;
+        border-radius: 12px !important;
+        padding: 20px !important;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.5) !important;
+    }
+    [data-testid="stMetricValue"] > div {
+        color: #58A6FF !important;
+        font-weight: 800 !important;
+        text-shadow: 0 0 10px rgba(88, 166, 255, 0.3) !important;
+    }
+    [data-testid="stMetricLabel"] > div {
+        color: #8B949E !important;
+        text-transform: uppercase !important;
+        font-size: 0.8em !important;
+        letter-spacing: 1px !important;
+    }
+
+    /* Specific Strategy Box (Ultra Dark Variant) */
+    .unified-strategy-box {
+        background-color: #0D1117;
+        border: 2px solid #238636;
+        padding: 30px;
+        border-radius: 16px;
+        box-shadow: 0 0 20px rgba(35, 134, 54, 0.2);
+        margin-top: 20px;
+    }
+    
+    /* Input field styling for dark mode */
+    .stSelectbox div[data-baseweb="select"], .stTextInput input {
+        background-color: #21262D !important;
+        color: white !important;
+        border: 1px solid #30363D !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -74,6 +87,7 @@ def load_and_clean_data():
         num_cols = df.select_dtypes(include=[np.number]).columns
         for col in num_cols:
             q1, q3 = df[col].quantile(0.25), df[col].quantile(0.75)
+            # Standard IQR clipping
             iqr = q3 - q1
             df[col] = df[col].clip(q1 - 1.5*iqr, q3 + 1.5*iqr)
         return df
@@ -141,30 +155,30 @@ if df_raw is not None:
     df_raw['segment'] = df_raw['cluster_id'].map(seg_names)
 
 # ==========================================
-# MAIN INTERFACE (RECOVERY & RECOMMENDATION)
+# MAIN INTERFACE
 # ==========================================
-st.title("🎯 Telecom Retention & Strategy Engine")
+st.title("🎯 Telecom Decision & Strategy Hub")
+st.write("### AI-Powered Retention Engine")
 st.markdown("---")
 
 # Layout: Selection Sidebar
-st.sidebar.header("🔍 Find Customer")
-search_type = st.sidebar.radio("Lookup Method", ["Scroll List", "Manual ID Code"])
+st.sidebar.header("🔍 Customer Lookup")
+search_type = st.sidebar.radio("Method", ["Selection List", "Manual ID Entry"])
 
-if search_type == "Scroll List":
-    selected_id = st.sidebar.selectbox("Select Customer ID", df_raw['customer_id'].unique()[:500])
+if search_type == "Selection List":
+    selected_id = st.sidebar.selectbox("Choose Customer", df_raw['customer_id'].unique()[:500])
 else:
-    id_input = st.sidebar.text_input("Type ID (e.g. 10, 42)")
+    id_input = st.sidebar.text_input("Enter ID (e.g. 1, 15)")
     try:
         selected_id = int(id_input) if id_input else None
     except:
-        st.sidebar.error("Please enter a numeric ID")
         selected_id = None
 
 # PROCESS RESULTS
 if selected_id in df_raw['customer_id'].values:
     user_data = df_raw[df_raw['customer_id'] == selected_id].iloc[0]
     
-    # --- Prediction Processing ---
+    # --- ML Inference ---
     temp_df = df_raw.copy()
     le = LabelEncoder()
     for col in temp_df.select_dtypes(include=['object']):
@@ -178,15 +192,14 @@ if selected_id in df_raw['customer_id'].values:
     prob = probs[1] if len(probs) > 1 else (1.0 if model_pred.classes_[0] == 1 else 0.0)
     is_churn = model_pred.predict(user_scaled)[0]
     
-    # --- UI Grid ---
-    st.subheader("📊 Performance Metrics")
+    # --- Dashboard Metrics ---
+    st.subheader("� Real-time Analytics")
     m1, m2, m3 = st.columns(3)
     m1.metric("Predicted Churn Risk", f"{prob:.1%}")
-    m2.metric("Customer Segment", user_data['segment'])
-    m3.metric("Status", "🔴 AT RISK" if is_churn == 1 else "🟢 STABLE")
+    m2.metric("Behavioral Segment", user_data['segment'])
+    m3.metric("Retention Status", "🔴 AT RISK" if is_churn == 1 else "🟢 STABLE")
     
-    st.write("### 💡 Recommended Strategy")
-    
+    # --- Strategy Recommendation Engine ---
     segment = user_data['segment']
     usage = user_data['data_used']
     salary = user_data['estimated_salary']
@@ -195,63 +208,64 @@ if selected_id in df_raw['customer_id'].values:
     ai_justification = ""
     est_cost = 0
     
-    # RECOMMENDATION ENGINE (ENHANCED LOGIC)
     if is_churn == 0:
         if "Premium" in segment:
-            strategy_title = "Gold Membership Anniversary Offer"
-            ai_justification = "Our analysis shows this customer is highly stable and profitable. **Best Strategy**: Lock in their loyalty by acknowledging their 'High-Value' Status with a premium perk."
-            est_cost = 45
+            strategy_title = "Action: VIP Excellence Bundle"
+            ai_justification = "Customer is high-value and loyal. **Strategic Goal**: Reward stability with an invite-only service tier to prevent competitive poaching."
+            est_cost = 60
         elif usage > 5000:
-            strategy_title = "Loyalty Speed Multiplier"
-            ai_justification = "Heavy data usage detected. **Best Strategy**: Provide a free 'Premium Speed' boost for 30 days to reinforce value perception."
-            est_cost = 5
+            strategy_title = "Action: Unlimited Data Speed Trial"
+            ai_justification = "Heavy user found. **Strategic Goal**: Boost perceived value by removing speed caps for 3 months."
+            est_cost = 10
         else:
-            strategy_title = "Smart Engagement Check-in"
-            ai_justification = "Healthy parameters. **Best Strategy**: Automated personalized content to maintain brand visibility."
+            strategy_title = "Action: Periodic Care Notification"
+            ai_justification = "Balanced usage patterns. **Strategic Goal**: Low-cost relational touchpoints via automated AI messaging."
             est_cost = 1
     else:
-        # CHURN PREVENTION
-        if salary > 80000 and usage < 1000:
-            strategy_title = "Proactive Cost-Saver Optimization"
-            ai_justification = "Customer exhibits 'Overpaying' behavior. **Best Strategy**: Offer a cheaper plan before they churn for a competitor. Saving the client with lower ARPU is better than 100% loss."
-            est_cost = 25
+        # CHURN RISK MITIGATION
+        if salary > 85000 and usage < 1200:
+            strategy_title = "Action: Cost-Save Optimization Call"
+            ai_justification = "Customer is 'Value Seeking'. They pay for more than they use. **Strategic Goal**: Proactively downsell to a cheaper plan to save the relationship."
+            est_cost = 20
         elif "Heavy Data" in segment:
-            strategy_title = "Data Loyalty Shield (50% Off)"
-            ai_justification = "Usage is high but risk is imminent. **Best Strategy**: Aggressive 6-month discount on data to nullify competitor pricing threats."
+            strategy_title = "Action: 50% Data Loyalty Credit"
+            ai_justification = "Data consumption is the primary bond. **Strategic Goal**: Massive price decrease for 4 months to neutralize competitor data offers."
             est_cost = 120
         elif "Budget" in segment:
-            strategy_title = "Financial Incentive: $30 Bill Credit"
-            ai_justification = "Salary is in lower quartile. **Best Strategy**: Price sensitivity is the driver. A direct bill credit is the most effective retention tool."
-            est_cost = 30
+            strategy_title = "Action: Direct Bill Subsidy ($25)"
+            ai_justification = "Price sensitivity is the driver. **Strategic Goal**: Immediate financial relief to bridge the churn decision period."
+            est_cost = 25
         else:
-            strategy_title = "Strategic Retention Callback"
-            ai_justification = "Behavioral driver unclear. **Best Strategy**: Direct reach-out from manager with an open-ended credit offer to diagnose and solve dissatisfaction."
-            est_cost = 40
+            strategy_title = "Action: Priority Win-Back Call"
+            ai_justification = "Complex churn indicators. **Strategic Goal**: Direct human intervention from retention desk with flexi-credit."
+            est_cost = 45
 
-    # --- Unified Strategy Card (Dark Mode Edition) ---
+    # Unified Strategic Result Card
+    roi = ( (1200 if "Premium" in segment else 600) * 0.50 ) - est_cost
+    
     st.markdown(f"""
-    <div style="background-color: #1E293B; border: 2px solid #10B981; padding: 25px; border-radius: 15px; box-shadow: 0 0 15px rgba(16, 185, 129, 0.2);">
-        <h3 style="color: #10B981; margin-top: 0; text-shadow: 0 0 5px rgba(16, 185, 129, 0.3);">🚀 RECOMMENDED STRATEGY: {strategy_title}</h3>
-        <p style="color: #F1F5F9; font-size: 1.1em; line-height: 1.6;">{ai_justification}</p>
-        <hr style="border: 0; border-top: 1px solid #334155; margin: 20px 0;">
-        <div style="display: flex; gap: 40px;">
+    <div class="unified-strategy-box">
+        <h2 style="color: #39D353 !important; margin-top: 0;">🏆 BEST STRATEGY: {strategy_title}</h2>
+        <p style="font-size: 1.15em; line-height: 1.6; color: #C9D1D9 !important;">{ai_justification}</p>
+        <hr style="border-top: 1px solid #30363D; margin: 20px 0;">
+        <div style="display: flex; gap: 50px;">
             <div>
-                <span style="color: #94A3B8; font-weight: 600; text-transform: uppercase; font-size: 0.85em;">Estimated Cost</span><br>
-                <span style="color: #F8FAFC; font-size: 1.4em; font-weight: 700;">${est_cost}</span>
+                <span style="color: #8B949E; font-size: 0.9em; font-weight: 600;">ESTIMATED COST</span><br>
+                <span style="color: #F8FAFC; font-size: 1.5em; font-weight: 800;">${est_cost}</span>
             </div>
             <div>
-                <span style="color: #94A3B8; font-weight: 600; text-transform: uppercase; font-size: 0.85em;">Projected ROI</span><br>
-                <span style="color: #10B981; font-size: 1.4em; font-weight: 700;">${roi:.2f}</span>
+                <span style="color: #8B949E; font-size: 0.9em; font-weight: 600;">PROJECTED IMPACT (ANNUAL ROI)</span><br>
+                <span style="color: #39D353; font-size: 1.5em; font-weight: 800;">${roi:,.2f}</span>
             </div>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-    with st.expander("👤 Raw Customer Profile Data"):
+    with st.expander("� Deep Dive: Customer Profile Data"):
         st.dataframe(user_data.to_frame().T)
 
 else:
     if selected_id:
-        st.warning("⚠️ Customer ID not found in current records.")
+        st.warning("Customer ID not found.")
     else:
-        st.info("👋 Welcome! Use the sidebar to select a customer and generate an AI retention strategy.")
+        st.info("👋 System Ready. Select or type a Customer ID to generate the optimized AI strategy.")
