@@ -7,6 +7,47 @@ from sklearn.preprocessing import LabelEncoder, StandardScaler
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
+st.markdown("""
+<style>
+
+/* === FORCE DARK ROOT FIX === */
+html, body {
+    background-color: #0B0E14 !important;
+}
+
+.stApp {
+    background-color: #0B0E14 !important;
+}
+
+/* Main content area */
+[data-testid="stAppViewContainer"] {
+    background-color: #0B0E14 !important;
+}
+
+/* The white killer container */
+[data-testid="stAppViewBlockContainer"] {
+    background-color: #0B0E14 !important;
+    padding-top: 2rem;
+}
+
+/* Center content */
+.main {
+    background-color: #0B0E14 !important;
+}
+
+/* Remove Streamlit default white sections */
+section.main > div {
+    background-color: #0B0E14 !important;
+}
+
+/* Text safety */
+h1, h2, h3, h4, h5, h6, p, span, label {
+    color: #E5E7EB !important;
+}
+
+</style>
+""", unsafe_allow_html=True)
+
 
 st.set_page_config(
     page_title="AI Strategic Command",
@@ -227,3 +268,4 @@ else:
     ax.tick_params(colors="white")
     ax.set_title("Behavioral Cluster Map", color="#F59E0B")
     st.pyplot(fig)
+
