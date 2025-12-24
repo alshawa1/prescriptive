@@ -152,17 +152,33 @@ elif sidebar_opt == "Predict & Recommend":
         if 'date' not in col: data_encoded[col] = le.fit_transform(data_encoded[col].astype(str))
     
     X_full = data_encoded.drop(['churn', 'customer_id', 'date_of_registration'], axis=1, errors='ignore')
-    user_features = X_full.loc[df['customer_id'] == cust_id]
-    user_scaled = scaler.transform(user_features)
+    # Use the specific index of the selected customer row to avoid mismatches
+    user_features = X_full.loc[[customer_row.name]]
     
-    pred_prob = model.predict_proba(user_scaled)[0][1]
-    pred_class = model.predict(user_scaled)[0]
-    
-    st.write("---")
-    col_p1, col_p2 = st.columns(2)
-    with col_p1:
-        st.metric("Churn Probability", f"{pred_prob:.2%}")
-    with col_p2:
+    if user_features.empty:
+        st.error("Could not process features for this customer.")
+    else:
+        user_scaled = scaler.transform(user_features)
+        
+        # Robust Prediction
+        probs = model.predict_proba(user_scaled)[0]
+        # If model only knows one class, handle it
+        if len(probs) > 1:
+            pred_prob = probs[1]
+        else:
+            # If only class 0 exists in model, prob of churn (class 1) is 0
+            # If only class 1 exists, prob is 1. Check model.classes_[0]
+            pred_prob = 1.0 if model.classes_[0] == 1 else 0.0
+            
+        pred_class = model.predict(user_scaled)[0]
+        
+        st.write("---")
+        col_p1, col_p2 = st.columns(2)
+        with col_p1:
+            st.metric("Churn Probability", f"{pred_prob:.2%}")
+        with col_p2:
+            status = "🔴 High Risk (Churn)" if pred_class == 1 else "🟢 Low Risk (Retained)"
+            st.metric("Prediction Status", status)
         status = "🔴 High Risk (Churn)" if pred_class == 1 else "🟢 Low Risk (Retained)"
         st.metric("Prediction Status", status)
         
