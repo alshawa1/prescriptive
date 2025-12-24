@@ -32,28 +32,29 @@ st.markdown("""
         letter-spacing: 1.5px;
     }
 
-    /* Metric Cards - Warm Industrial Design */
-    [data-testid="stMetric"] {
-        background: rgba(20, 20, 20, 0.9) !important;
-        border: 1px solid rgba(245, 158, 11, 0.2) !important;
+    /* Metric Cards - Nuclear Dark Force */
+    [data-testid="stMetric"], .stMetric, div[data-testid="metric-container"] {
+        background-color: #0F0F0F !important;
+        background: #0F0F0F !important;
+        border: 1px solid rgba(245, 158, 11, 0.3) !important;
         border-radius: 12px !important;
         padding: 24px !important;
-        box-shadow: 0 4px 30px rgba(0, 0, 0, 0.4) !important;
-        transition: 0.3s all ease;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
     }
-    [data-testid="stMetric"]:hover {
-        border: 1px solid #F59E0B !important;
-        box-shadow: 0 0 20px rgba(245, 158, 11, 0.15) !important;
-    }
-    [data-testid="stMetricValue"] > div {
+    
+    /* Force Metric Text Colors */
+    [data-testid="stMetricValue"] div, [data-testid="stMetricValue"] {
         color: #F59E0B !important;
         font-weight: 800 !important;
-        text-shadow: 0 0 12px rgba(245, 158, 11, 0.3);
     }
-    [data-testid="stMetricLabel"] > div {
+    [data-testid="stMetricLabel"] div, [data-testid="stMetricLabel"] p, [data-testid="stMetricLabel"] {
         color: #999999 !important;
-        font-weight: 600 !important;
-        letter-spacing: 1.5px;
+    }
+
+    /* Expanders & Other Boxes */
+    .streamlit-expanderHeader, .stExpander {
+        background-color: #111 !important;
+        border-color: #222 !important;
     }
 
     /* The 'Strategy Command' Card - Flagship Amber */
