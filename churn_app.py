@@ -13,60 +13,39 @@ from sklearn.cluster import KMeans
 # ==========================================
 st.set_page_config(page_title="Telecom Strategic AI", layout="wide", page_icon="🎯")
 
-# Custom CSS for a Light, Premium, Vibrant Design
+# Custom CSS for high contrast and coordination
 st.markdown("""
 <style>
-    /* Main Background */
-    .stApp {
-        background-color: #F8F9FB;
+    /* High Contrast Text */
+    .main .block-container h1, .main .block-container h2, .main .block-container h3, .main .block-container p, .main .block-container span {
+        color: #0F172A !important;
     }
     
-    /* Global Text and Headers */
-    h1, h2, h3 {
-        color: #1E293B;
-        font-family: 'Inter', sans-serif;
-        font-weight: 700;
+    /* Sidebar Text visibility */
+    [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
+        color: #1E293B !important;
     }
-    
-    /* Metric Cards Styling */
-    [data-testid="stMetricValue"] {
-        font-size: 28px;
-        color: #2563EB;
-    }
+
+    /* Metric Card Improvements */
     [data-testid="stMetric"] {
-        background-color: white;
-        padding: 24px;
-        border-radius: 16px;
-        box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
-        border: 1px solid #E2E8F0;
+        background-color: #FFFFFF !important;
+        border: 1px solid #E2E8F0 !important;
+        padding: 20px !important;
+        border-radius: 12px !important;
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1) !important;
     }
-    
-    /* Sidebar Styling */
-    [data-testid="stSidebar"] {
-        background-color: white;
-        border-right: 1px solid #E2E8F0;
+    [data-testid="stMetricValue"] > div {
+        color: #2563EB !important;
     }
-    
-    /* Success/Info Message Overrides */
-    .stAlert {
-        border-radius: 12px;
-        border: none;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+    [data-testid="stMetricLabel"] > div {
+        color: #64748B !important;
     }
-    
-    /* Button and Input Styling */
-    .stButton>button {
-        background-color: #2563EB;
-        color: white;
-        border-radius: 8px;
-        border: none;
-        padding: 10px 24px;
-        font-weight: 600;
-        transition: all 0.3s ease;
-    }
-    .stButton>button:hover {
-        background-color: #1D4ED8;
-        transform: translateY(-1px);
+
+    /* Strategy Box Styling */
+    .stSuccess {
+        background-color: #F0FDF4 !important;
+        border: 1px solid #BBF7D0 !important;
+        color: #166534 !important;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -236,17 +215,24 @@ if selected_id in df_raw['customer_id'].values:
             ai_justification = "Behavioral driver unclear. **Best Strategy**: Direct reach-out from manager with an open-ended credit offer to diagnose and solve dissatisfaction."
             est_cost = 40
 
-    st.success(f"### BEST STRATEGY: {strategy_title}")
-    
-    with st.container():
-        st.markdown(f"**AI Strategy Rationale**: {ai_justification}")
-        col_c1, col_c2 = st.columns(2)
-        with col_c1:
-            st.info(f"**Estimated Execution Cost**: `${est_cost}`")
-        with col_c2:
-            base_val = 600 if "Premium" not in segment else 1200
-            roi = (base_val * 0.50) - est_cost
-            st.warning(f"**Projected Annual ROI**: `${roi:.2f}`")
+    # --- Unified Strategy Card ---
+    st.markdown(f"""
+    <div style="background-color: #F0FDF4; border: 1px solid #BBF7D0; padding: 25px; border-radius: 15px;">
+        <h3 style="color: #166534; margin-top: 0;">🚀 RECOMMENDED STRATEGY: {strategy_title}</h3>
+        <p style="color: #1E293B; font-size: 1.1em; line-height: 1.6;">{ai_justification}</p>
+        <hr style="border: 0; border-top: 1px solid #BBF7D0; margin: 20px 0;">
+        <div style="display: flex; gap: 40px;">
+            <div>
+                <span style="color: #64748B; font-weight: 600; text-transform: uppercase; font-size: 0.85em;">Estimated Cost</span><br>
+                <span style="color: #0F172A; font-size: 1.4em; font-weight: 700;">${est_cost}</span>
+            </div>
+            <div>
+                <span style="color: #64748B; font-weight: 600; text-transform: uppercase; font-size: 0.85em;">Projected ROI</span><br>
+                <span style="color: #166534; font-size: 1.4em; font-weight: 700;">${roi:.2f}</span>
+            </div>
+        </div>
+    </div>
+    """, unsafe_allow_html=True)
 
     with st.expander("👤 Raw Customer Profile Data"):
         st.dataframe(user_data.to_frame().T)
