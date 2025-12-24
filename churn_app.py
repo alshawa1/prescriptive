@@ -13,43 +13,52 @@ from sklearn.cluster import KMeans
 # ==========================================
 st.set_page_config(page_title="Telecom Strategic AI", layout="wide", page_icon="🎯")
 
-# Custom CSS for a Sleek Dark Premium Design
+# Custom CSS for a Robust Premium Dark Design
 st.markdown("""
 <style>
-    /* Dark Background and High Contrast */
-    .stApp {
-        background-color: #0F172A;
-        color: #E2E8F0;
-    }
-    
-    /* Headers */
-    h1, h2, h3 {
-        color: #F8FAFC !important;
-        font-family: 'Inter', sans-serif;
-    }
-    
-    /* Sidebar Dark */
-    [data-testid="stSidebar"] {
-        background-color: #1E293B !important;
-    }
-    [data-testid="stSidebar"] p, [data-testid="stSidebar"] span, [data-testid="stSidebar"] label {
+    /* Force Dark Theme on everything */
+    html, body, [data-testid="stAppViewContainer"], [data-testid="stHeader"], [data-testid="stSidebar"] {
+        background-color: #0F172A !important;
         color: #F1F5F9 !important;
     }
+    
+    /* Main Content Container */
+    .main .block-container {
+        background-color: #0F172A !important;
+        border-radius: 20px;
+    }
 
-    /* Metric Card Dark Premium */
+    /* Headers - Maximum Contrast */
+    h1, h2, h3, h4, h5, h6, .stMarkdown p {
+        color: #F8FAFC !important;
+    }
+
+    /* Metric Boxes - Glowing Dark Card */
     [data-testid="stMetric"] {
         background-color: #1E293B !important;
-        border: 1px solid #334155 !important;
+        border: 2px solid #334155 !important;
+        border-radius: 16px !important;
         padding: 20px !important;
-        border-radius: 12px !important;
-        box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.3) !important;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4) !important;
     }
     [data-testid="stMetricValue"] > div {
         color: #38BDF8 !important;
-        text-shadow: 0 0 10px rgba(56, 189, 248, 0.4);
+        font-weight: 800 !important;
+        text-shadow: 0 0 12px rgba(56, 189, 248, 0.5) !important;
     }
     [data-testid="stMetricLabel"] > div {
         color: #94A3B8 !important;
+        font-weight: 600 !important;
+        text-transform: uppercase !important;
+        letter-spacing: 0.05em !important;
+    }
+
+    /* Sidebar Contrast Fix */
+    [data-testid="stSidebarNav"] {
+        background-color: #1E293B !important;
+    }
+    [data-testid="stSidebar"] * {
+        color: #F1F5F9 !important;
     }
 </style>
 """, unsafe_allow_html=True)
