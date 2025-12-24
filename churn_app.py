@@ -117,20 +117,26 @@ if nav == "Data Exploration":
     with c1:
         st.subheader("Churn Overview")
         st.write(df_raw['churn'].value_counts(normalize=True).map(lambda x: f"{x:.1%}"))
-        fig, ax = plt.subplots(figsize=(6,3))
-        sns.countplot(x='churn', data=df_raw, palette='viridis')
+        fig, ax = plt.subplots(figsize=(7,4))
+        sns.countplot(x='churn', data=df_raw, palette='viridis', ax=ax)
+        plt.title("Distribution of Churn (Target Variable)")
+        plt.xlabel("Churned? (0=No, 1=Yes)")
+        plt.ylabel("Number of Customers")
         st.pyplot(fig)
     with c2:
-        st.subheader("Top Features Correlated with Churn")
+        st.subheader("Top Drivers of Churn")
         num_df = df_raw.select_dtypes(include=[np.number])
-        corr = num_df.corr()['churn'].sort_values(ascending=False).drop('churn').head(5)
+        corr = num_df.corr()['churn'].sort_values(ascending=False).drop('churn').head(7)
         st.bar_chart(corr)
 
-    st.subheader("Customer Segments (K-Means)")
+    st.subheader("Customer Behavioral Segments")
     df_raw['segment'] = df_raw['cluster_id'].map(seg_names)
-    fig2, ax2 = plt.subplots(figsize=(10,4))
-    sns.countplot(x='segment', data=df_raw, palette='magma')
+    fig2, ax2 = plt.subplots(figsize=(12,5))
+    sns.countplot(x='segment', data=df_raw, palette='magma', ax=ax2)
+    plt.title("Distribution of AI-Generated Customer Segments")
     plt.xticks(rotation=15)
+    plt.xlabel("Customer Segment")
+    plt.ylabel("Count")
     st.pyplot(fig2)
 
 elif nav == "Churn Prediction & AI Strategy":
@@ -151,7 +157,14 @@ elif nav == "Churn Prediction & AI Strategy":
     X_user = temp_df[temp_df['customer_id'] == selected_id].drop(columns=['churn', 'customer_id', 'date_of_registration', 'usage_intensity', 'cluster_id', 'segment'], errors='ignore')
     user_scaled = scaler_pred.transform(X_user)
     
-    prob = model_pred.predict_proba(user_scaled)[0][1]
+    # Robust Prediction
+    probs = model_pred.predict_proba(user_scaled)[0]
+    if len(probs) > 1:
+        prob = probs[1]
+    else:
+        # Handle case where only one class exists in training/model
+        prob = 1.0 if model_pred.classes_[0] == 1 else 0.0
+        
     is_churn = model_pred.predict(user_scaled)[0]
     
     st.write("---")
