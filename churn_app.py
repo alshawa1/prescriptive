@@ -8,242 +8,222 @@ from sklearn.ensemble import RandomForestClassifier
 from sklearn.cluster import KMeans
 from sklearn.decomposition import PCA
 
-# ==========================================
-# 0. THEME ARCHITECTURE (V7.0 - MIDNIGHT AMBER)
-# ==========================================
-st.set_page_config(page_title="AI STRATEGY COMMAND", layout="wide", page_icon="🚔")
+st.set_page_config(
+    page_title="AI Strategic Command",
+    layout="wide",
+    page_icon="🛰️"
+)
 
 st.markdown("""
 <style>
-    /* Global Base - Midnight Charcoal */
-    [data-testid="stAppViewContainer"], [data-testid="stHeader"], [data-testid="stSidebar"], .main {
-        background-color: #050505 !important;
-        color: #E0E0E0 !important;
-        font-family: 'Inter', 'Segoe UI', sans-serif;
-    }
+:root {
+    --bg-main: #0B0E14;
+    --bg-card: #121826;
+    --bg-sidebar: #0F1320;
+    --border-soft: #1F2937;
+    --text-main: #E5E7EB;
+    --text-muted: #9CA3AF;
+    --accent: #F59E0B;
+}
 
-    /* Headings - Amber Gradient */
-    h1, h2, h3 {
-        background: linear-gradient(90deg, #F59E0B 0%, #D97706 100%);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        font-weight: 900 !important;
-        text-transform: uppercase;
-        letter-spacing: 1.5px;
-    }
+html, body, [data-testid="stAppViewContainer"] {
+    background-color: var(--bg-main) !important;
+    color: var(--text-main);
+    font-family: Inter, system-ui, sans-serif;
+}
 
-    /* Metric Cards - Nuclear Dark Force */
-    [data-testid="stMetric"], .stMetric, div[data-testid="metric-container"] {
-        background-color: #0F0F0F !important;
-        background: #0F0F0F !important;
-        border: 1px solid rgba(245, 158, 11, 0.3) !important;
-        border-radius: 12px !important;
-        padding: 24px !important;
-        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.8) !important;
-    }
-    
-    /* Force Metric Text Colors */
-    [data-testid="stMetricValue"] div, [data-testid="stMetricValue"] {
-        color: #F59E0B !important;
-        font-weight: 800 !important;
-    }
-    [data-testid="stMetricLabel"] div, [data-testid="stMetricLabel"] p, [data-testid="stMetricLabel"] {
-        color: #999999 !important;
-    }
+section[data-testid="stSidebar"] {
+    background-color: var(--bg-sidebar) !important;
+    border-right: 1px solid var(--border-soft);
+}
 
-    /* Expanders & Other Boxes */
-    .streamlit-expanderHeader, .stExpander {
-        background-color: #111 !important;
-        border-color: #222 !important;
-    }
+h1, h2, h3 {
+    color: var(--accent) !important;
+    font-weight: 800;
+    letter-spacing: 1px;
+}
 
-    /* The 'Strategy Command' Card - Flagship Amber */
-    .strategy-hq {
-        background: #111;
-        border: 1px solid #222;
-        border-top: 5px solid #F59E0B;
-        padding: 40px;
-        border-radius: 10px;
-        margin: 30px 0;
-        box-shadow: 0 15px 50px rgba(0,0,0,0.6);
-    }
-    
-    /* Interactive Elements Styling */
-    .stDataFrame, div[data-baseweb="select"], input {
-        background-color: #111 !important;
-        color: white !important;
-        border: 1px solid #333 !important;
-    }
-    
-    /* Sidebar */
-    section[data-testid="stSidebar"] > div {
-        background-color: #080808 !important;
-        border-right: 1px solid #222 !important;
-    }
+p, label, span {
+    color: var(--text-main);
+}
+
+[data-testid="stMetric"] {
+    background: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 14px;
+    padding: 22px;
+}
+
+[data-testid="stMetricValue"] {
+    color: var(--accent) !important;
+    font-weight: 800;
+    font-size: 1.8rem;
+}
+
+[data-testid="stMetricLabel"] {
+    color: var(--text-muted) !important;
+}
+
+.strategy-box {
+    background: linear-gradient(160deg, #121826, #0F172A);
+    border: 1px solid var(--border-soft);
+    border-left: 6px solid var(--accent);
+    border-radius: 14px;
+    padding: 36px;
+    margin-top: 30px;
+}
+
+.strategy-box h2 {
+    margin-top: 0;
+}
+
+input, textarea, select, div[data-baseweb="select"] {
+    background-color: #0F172A !important;
+    color: white !important;
+    border: 1px solid var(--border-soft) !important;
+    border-radius: 8px;
+}
+
+.stDataFrame {
+    background-color: var(--bg-card);
+}
+
+.stExpander {
+    background-color: var(--bg-card);
+    border: 1px solid var(--border-soft);
+    border-radius: 10px;
+}
 </style>
 """, unsafe_allow_html=True)
 
-# ==========================================
-# 1. AI CORE (Fully Verified Logic)
-# ==========================================
 @st.cache_data
-def get_verified_data():
-    try:
-        df = pd.read_csv('telecom_churn.csv')
-        df = df.fillna(df.median(numeric_only=True))
-        return df
-    except Exception as e:
-        st.error(f"FATAL: Missing 'telecom_churn.csv'. System cannot proceed. Error: {e}")
-        return None
+def load_data():
+    df = pd.read_csv("telecom_churn.csv")
+    df = df.fillna(df.median(numeric_only=True))
+    return df
 
 @st.cache_resource
-def train_ai_systems(df):
-    # Predictive Agent
+def build_ai(df):
     data = df.copy()
     le = LabelEncoder()
-    for col in data.select_dtypes(include=['object']):
-        if 'date' not in col: data[col] = le.fit_transform(data[col].astype(str))
-    
-    X = data.drop(columns=['churn', 'customer_id'], errors='ignore')
-    y = data['churn']
+    for c in data.select_dtypes(include="object"):
+        data[c] = le.fit_transform(data[c].astype(str))
+
+    X = data.drop(columns=["churn", "customer_id"], errors="ignore")
+    y = data["churn"]
+
     scaler = StandardScaler().fit(X)
-    X_s = scaler.transform(X)
-    model = RandomForestClassifier(n_estimators=100, max_depth=10, random_state=42).fit(X_s, y)
-    
-    # Clustering Agent
-    c_features = ['age', 'estimated_salary', 'data_used', 'calls_made']
-    X_c = df[c_features].copy()
-    scaler_c = StandardScaler().fit(X_c)
-    X_cs = scaler_c.transform(X_c)
-    
-    kmeans = KMeans(n_clusters=4, random_state=42, n_init=10).fit(X_cs)
-    
-    # Generate Cluster Names
+    model = RandomForestClassifier(
+        n_estimators=120,
+        max_depth=12,
+        random_state=42
+    ).fit(scaler.transform(X), y)
+
+    cluster_cols = ["age", "estimated_salary", "data_used", "calls_made"]
+    Xc = df[cluster_cols]
+    scaler_c = StandardScaler().fit(Xc)
+    kmeans = KMeans(n_clusters=4, n_init=10, random_state=42).fit(scaler_c.transform(Xc))
+
     centers = scaler_c.inverse_transform(kmeans.cluster_centers_)
-    df_centers = pd.DataFrame(centers, columns=c_features)
-    medians = X_c.median()
-    
-    name_map = {}
-    for i, row in df_centers.iterrows():
-        if row['data_used'] > medians['data_used'] * 1.5: name = "Data Pioneer"
-        elif row['estimated_salary'] > medians['estimated_salary'] * 1.5: name = "Elite Premium"
-        elif row['calls_made'] > medians['calls_made'] * 1.3: name = "Talkative Connector"
-        else: name = "Standard Operational"
-        name_map[i] = name
-        
-    return model, scaler, kmeans, scaler_c, c_features, name_map, kmeans.labels_
+    med = Xc.median()
 
-# ==========================================
-# 2. RUNTIME BOOTSTRAP
-# ==========================================
-df = get_verified_data()
-if df is not None:
-    ai_model, ai_scaler, ai_kmeans, ai_scaler_c, c_feats, ai_name_map, ai_labels = train_ai_systems(df)
-    df['Cluster_ID'] = ai_labels
-    df['Segment'] = df['Cluster_ID'].map(ai_name_map)
+    names = {}
+    for i, r in enumerate(centers):
+        if r[2] > med["data_used"] * 1.5:
+            names[i] = "Data Power User"
+        elif r[1] > med["estimated_salary"] * 1.5:
+            names[i] = "Elite Premium"
+        elif r[3] > med["calls_made"] * 1.3:
+            names[i] = "Voice Intensive"
+        else:
+            names[i] = "Balanced Core"
 
-# ==========================================
-# 3. COMMAND INTERFACE
-# ==========================================
-st.title("🛰️ AI STRATEGIC COMMAND: AMBER v7.0")
+    return model, scaler, kmeans, scaler_c, cluster_cols, names
+
+df = load_data()
+model, scaler, km, scaler_c, ccols, cmap = build_ai(df)
+df["Cluster"] = km.labels_
+df["Segment"] = df["Cluster"].map(cmap)
+
+st.title("🛰️ AI Strategic Command Center")
 st.write("---")
 
-# Navigation Hub
 with st.sidebar:
-    st.header("🎛️ CUSTOMER SEARCH")
-    search_mode = st.radio("SEARCH BY", ["SCROLL LIST", "MANUAL ID"], horizontal=True)
-    if search_mode == "SCROLL LIST":
-        selected_id = st.selectbox("IDENTIFY ANALYTIC TARGET", df['customer_id'].unique()[:500])
+    st.header("🎯 Customer Targeting")
+    mode = st.radio("Lookup Mode", ["Select", "Manual"])
+    if mode == "Select":
+        cid = st.selectbox("Customer ID", df["customer_id"].unique()[:500])
     else:
-        id_input = st.text_input("ENTER ENTRY CODE")
-        try: selected_id = int(id_input) if id_input else None
-        except: selected_id = None
+        cid = st.text_input("Enter ID")
+        cid = int(cid) if cid.isdigit() else None
 
-    st.write("---")
-    st.success("�️ **SYSTEM STATUS: OPTIMAL**")
-    st.info("💡 **VERSION 7.0**: All systems verified and executing.")
+    st.success("SYSTEM ONLINE")
+    st.caption("Version 7.1 · Visual Optimized")
 
-# MAIN DASHBOARD
-if selected_id in df['customer_id'].values:
-    user = df[df['customer_id'] == selected_id].iloc[0]
-    
-    # Live Metrics
-    st.subheader("📡 SYSTEM TELEMETRY")
-    m1, m2, m3, m4 = st.columns(4)
-    
-    # Risk Inference
-    X_target = df[df['customer_id'] == selected_id].drop(columns=['churn', 'customer_id', 'Cluster_ID', 'Segment'], errors='ignore')
-    for col in X_target.select_dtypes(include=['object']): X_target[col] = 0 # Baseline for categorical
-    
-    risk_prob = ai_model.predict_proba(ai_scaler.transform(X_target))[0][1]
-    
-    m1.metric("CHURN PROBABILITY", f"{risk_prob:.1%}")
-    m2.metric("CURRENT COHORT", user['Segment'])
-    m3.metric("ALERT SYSTEM", "CRITICAL" if risk_prob > 0.5 else "NOMINAL")
-    m4.metric("SALARY BRACKET", f"${user['estimated_salary']:,.0f}")
+if cid in df["customer_id"].values:
+    user = df[df["customer_id"] == cid].iloc[0]
 
-    # --- ACTION RECOMMENDATION ---
-    st.write("---")
-    st.subheader("🎯 RETENTION COMMAND LOGIC")
-    
-    strategy, rationale, cost = "Standard Outreach", "User in stable orbit. Continue maintenance.", 5
-    
-    if risk_prob < 0.3:
-        if "Elite" in user['Segment']:
-            strategy, rationale, cost = "VIP Concierge Upgrade", "Elite status identified. **Command**: Offer exclusive lifestyle event trial to ensure long-term base loyalty.", 90
-        else:
-            strategy, rationale, cost = "AI Engagement Sync", "Nominal risk. **Command**: Automated relationship touchpoints via personalized AI notifications.", 2
+    X_u = df[df["customer_id"] == cid].drop(
+        columns=["churn", "customer_id", "Cluster", "Segment"],
+        errors="ignore"
+    )
+    for c in X_u.select_dtypes(include="object"):
+        X_u[c] = 0
+
+    risk = model.predict_proba(scaler.transform(X_u))[0][1]
+
+    c1, c2, c3, c4 = st.columns(4)
+    c1.metric("Churn Risk", f"{risk:.1%}")
+    c2.metric("Segment", user["Segment"])
+    c3.metric("Status", "⚠️ HIGH RISK" if risk > 0.5 else "✅ STABLE")
+    c4.metric("Salary", f"${user['estimated_salary']:,.0f}")
+
+    if risk < 0.3:
+        strategy = "AI Engagement Flow"
+        cost = 5
+        reason = "Low risk detected. Maintain loyalty with automation."
+    elif "Elite" in user["Segment"]:
+        strategy = "VIP Retention Protocol"
+        cost = 90
+        reason = "High value elite customer at risk."
+    elif "Data" in user["Segment"]:
+        strategy = "Unlimited Data Boost"
+        cost = 120
+        reason = "Heavy data dependency identified."
     else:
-        # High Risk Logic
-        if user['estimated_salary'] > 85000 and user['data_used'] < 1200:
-            strategy, rationale, cost = "Value Reconstruction Call", "Customer is overpaying for services. **Command**: Proactively migrate to a cheaper plan to save the relationship.", 30
-        elif "Data" in user['Segment']:
-            strategy, rationale, cost = "Unlimited Data Loyalty Stimulus", "High data reliance found. **Command**: Grant 90 days of unthrottled bandwidth to block competitive shifting.", 130
-        else:
-            strategy, rationale, cost = "Human Specialist Intervention", "Complex risk factors. **Command**: Immediate outbound call from Retention HQ with 40% discount authority.", 65
+        strategy = "Human Retention Call"
+        cost = 60
+        reason = "Complex churn indicators detected."
 
-    # ROI Calculation
-    est_clv = 1600 if "Elite" in user['Segment'] else 750
-    roi = (est_clv * (1 - risk_prob)) - cost
+    clv = 1600 if "Elite" in user["Segment"] else 800
+    roi = (clv * (1 - risk)) - cost
 
     st.markdown(f"""
-    <div class="strategy-hq">
-        <h2 style="color: #F59E0B !important; margin-top: 0; letter-spacing: 2px;">🏆 TARGET STRATEGY: {strategy}</h2>
-        <p style="font-size: 1.25rem; line-height: 1.8; color: #CCCCCC !important;">{rationale}</p>
-        <hr style="border: 0; border-top: 1px solid #333; margin: 25px 0;">
-        <div style="display: flex; gap: 60px;">
-            <div>
-                <span style="color: #666; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Implementation Cost</span><br>
-                <span style="color: #FFFFFF; font-size: 1.8rem; font-weight: 950;">${cost}</span>
-            </div>
-            <div>
-                <span style="color: #666; font-size: 0.9rem; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Projected 12M ROI</span><br>
-                <span style="color: #F59E0B; font-size: 1.8rem; font-weight: 950;">${roi:,.2f}</span>
-            </div>
-        </div>
+    <div class="strategy-box">
+        <h2>🎯 Strategy: {strategy}</h2>
+        <p style="font-size:1.15rem;line-height:1.7">{reason}</p>
+        <hr style="border:0;border-top:1px solid #1F2937;margin:25px 0">
+        <b>Cost:</b> ${cost}<br>
+        <b>Projected ROI:</b> ${roi:,.2f}
     </div>
     """, unsafe_allow_html=True)
 
-    with st.expander("👤 VIEW RAW CUSTOMER TELEMETRY"):
+    with st.expander("Raw Customer Data"):
         st.dataframe(user.to_frame().T)
 
 else:
-    st.info("🔭 **SYSTEM SCANNING...** Target a Customer ID in the sidebar to generate a Command Strategy.")
-    
-    # Global Insight Map ( Landing Page)
-    st.write("### AI Behavioral Population View")
+    st.info("Select a customer to activate strategic mode.")
+
     pca = PCA(n_components=2)
-    sample_df = df.sample(1000) if len(df) > 1000 else df
-    X_viz = ai_scaler_c.transform(sample_df[c_feats])
-    pca_comp = pca.fit_transform(X_viz)
-    
-    df_viz = pd.DataFrame(pca_comp, columns=['PC1', 'PC2'])
-    df_viz['Segment'] = sample_df['Segment'].values
-    
+    samp = df.sample(800) if len(df) > 800 else df
+    Xp = pca.fit_transform(scaler_c.transform(samp[ccols]))
+    viz = pd.DataFrame(Xp, columns=["PC1", "PC2"])
+    viz["Segment"] = samp["Segment"].values
+
     fig, ax = plt.subplots(figsize=(10, 5))
-    sns.scatterplot(data=df_viz, x='PC1', y='PC2', hue='Segment', alpha=0.7, palette='autumn', ax=ax)
-    ax.set_title("Customer Multi-Dimensional Behavior Clustering", color='white')
-    ax.tick_params(colors='white')
-    fig.patch.set_facecolor('#050505')
-    ax.set_facecolor('#111')
+    sns.scatterplot(data=viz, x="PC1", y="PC2", hue="Segment", alpha=0.75, ax=ax)
+    ax.set_facecolor("#0B0E14")
+    fig.patch.set_facecolor("#0B0E14")
+    ax.tick_params(colors="white")
+    ax.set_title("Behavioral Cluster Map", color="#F59E0B")
     st.pyplot(fig)
