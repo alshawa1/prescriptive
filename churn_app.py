@@ -13,45 +13,48 @@ from sklearn.cluster import KMeans
 # ==========================================
 st.set_page_config(page_title="Telecom AI Strategy", layout="wide", page_icon="📡")
 
-# Ultra-Clean Modern Dark CSS
+# Robust Modern Dark CSS
 st.markdown("""
 <style>
-    /* 1. Global Background - Deep Graphite */
+    /* 1. Force background on every possible container */
     [data-testid="stAppViewContainer"], 
     [data-testid="stHeader"], 
     [data-testid="stSidebar"], 
+    [data-testid="stAppViewBlockContainer"],
     .main, .stApp, html, body {
         background-color: #0E1117 !important;
         color: #C9D1D9 !important;
-        font-family: 'Inter', sans-serif;
     }
 
-    /* 2. Professional Metric Cards */
+    /* 2. Professional Metric Cards - Explicitly Dark */
     [data-testid="stMetric"] {
         background-color: #161B22 !important;
         border: 1px solid #30363D !important;
         border-radius: 12px !important;
         padding: 20px !important;
-        box-shadow: 0 4px 0 rgba(0,0,0,0.1) !important;
+        box-shadow: 0 4px 10px rgba(0,0,0,0.3) !important;
     }
     
-    /* Metric Value - Emerald Glow */
+    /* Metric Value - Emerald High Contrast */
     [data-testid="stMetricValue"] > div {
-        color: #2EA043 !important;
+        color: #39D353 !important;
         font-weight: 700 !important;
-        font-size: 2rem !important;
+        font-size: 2.2rem !important;
     }
     [data-testid="stMetricLabel"] > div {
-        color: #8B949E !important;
+        color: #F0F6FC !important;
         text-transform: uppercase !important;
-        font-size: 0.75em !important;
+        font-size: 0.8em !important;
         font-weight: 600 !important;
         letter-spacing: 0.1em !important;
     }
 
-    /* 3. Headers & Decorations */
-    h1, h2, h3 {
+    /* 3. Headers - High Contrast */
+    h1, h2, h3, h4, .stMarkdown p {
         color: #F0F6FC !important;
+    }
+    
+    h1, h2, h3 {
         border-bottom: 2px solid #238636;
         padding-bottom: 10px;
         margin-bottom: 25px !important;
